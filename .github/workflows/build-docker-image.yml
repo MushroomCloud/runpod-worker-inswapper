@@ -97,8 +97,10 @@ jobs:
       - name: Free up disk space
         run: |
           sudo swapoff -a
-          sudo rm -rf /swapfile /usr/share/dotnet /usr/local/lib/android /opt/ghc
-          sudo apt clean
+          sudo rm -rf /swapfile /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache
+          sudo apt-get purge -y '^dotnet-.*' '^llvm-.*' 'php.*' azure-cli google-cloud-cli microsoft-edge-stable google-chrome-stable firefox powershell mono-devel 2>/dev/null || true
+          sudo apt-get autoremove -y
+          sudo apt-get clean
           df -h
 
       - name: Set up Docker Buildx
@@ -156,11 +158,8 @@ jobs:
           IMAGE="ghcr.io/${OWNER_LC}/${{ needs.detect-changes.outputs.app }}:${{ needs.detect-changes.outputs.release }}"
           echo "Verifying image: $IMAGE"
 
-          # Wait for registry to update
-          sleep 10
-
-          # Try to pull the image
-          docker pull $IMAGE && echo "✅ SUCCESS: Image verified: $IMAGE" || echo "❌ FAILED: Could not pull image: $IMAGE"
+          # Use imagetools inspect to verify without pulling the full image
+          docker buildx imagetools inspect $IMAGE && echo "✅ SUCCESS: Image verified: $IMAGE" || echo "❌ FAILED: Could not find image: $IMAGE"
 
       - name: List built image
         id: list-images
