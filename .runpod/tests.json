@@ -14,13 +14,14 @@
         "codeformer_fidelity": 0.5,
         "output_format": "JPEG"
       },
-      "timeout": 10000
+      "timeout": 120000
     }
   ],
   "config": {
     "gpuTypeId": "NVIDIA GeForce RTX 4090",
     "gpuCount": 1,
     "allowedCudaVersions": [
+      "13.0",
       "12.9",
       "12.8",
       "12.7",
