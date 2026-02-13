@@ -117,12 +117,15 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create temporary docker-bake override file
+        env:
+          OWNER: ${{ github.repository_owner }}
         run: |
+          OWNER_LC=$(echo "$OWNER" | tr '[:upper:]' '[:lower:]')
           # Create an override file that forces ghcr.io
-          cat > docker-bake.override.hcl << 'EOF'
+          cat > docker-bake.override.hcl << EOF
           target "default" {
             inherits = ["default"]
-            tags = ["ghcr.io/${{ github.repository_owner }}/${{ needs.detect-changes.outputs.app }}:${{ needs.detect-changes.outputs.release }}"]
+            tags = ["ghcr.io/${OWNER_LC}/${{ needs.detect-changes.outputs.app }}:${{ needs.detect-changes.outputs.release }}"]
           }
           EOF
 
@@ -146,8 +149,11 @@ jobs:
           echo "Build completed!"
 
       - name: Verify image was pushed
+        env:
+          OWNER: ${{ github.repository_owner }}
         run: |
-          IMAGE="ghcr.io/${{ github.repository_owner }}/${{ needs.detect-changes.outputs.app }}:${{ needs.detect-changes.outputs.release }}"
+          OWNER_LC=$(echo "$OWNER" | tr '[:upper:]' '[:lower:]')
+          IMAGE="ghcr.io/${OWNER_LC}/${{ needs.detect-changes.outputs.app }}:${{ needs.detect-changes.outputs.release }}"
           echo "Verifying image: $IMAGE"
 
           # Wait for registry to update
@@ -158,11 +164,13 @@ jobs:
 
       - name: List built image
         id: list-images
+        env:
+          OWNER: ${{ github.repository_owner }}
         run: |
           RELEASE="${{ needs.detect-changes.outputs.release }}"
           APP="${{ needs.detect-changes.outputs.app }}"
           REGISTRY="ghcr.io"
-          REGISTRY_USER="${{ github.repository_owner }}"
+          REGISTRY_USER=$(echo "$OWNER" | tr '[:upper:]' '[:lower:]')
 
           # Create the image name
           IMAGE="${REGISTRY}/${REGISTRY_USER}/${APP}:${RELEASE}"
