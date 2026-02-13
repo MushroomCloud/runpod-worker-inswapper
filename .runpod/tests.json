@@ -14,7 +14,7 @@
         "codeformer_fidelity": 0.5,
         "output_format": "JPEG"
       },
-      "timeout": 120000
+      "timeout": 30000
     }
   ],
   "config": {
